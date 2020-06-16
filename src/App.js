@@ -7,7 +7,7 @@ import "semantic-ui-css/semantic.min.css";
 import { Button } from "semantic-ui-react";
 
 require("dotenv").config();
-const redirectDomain = process.env.REACT_APP_SITE_DOMAIN + "/redirect";
+const redirectDomain = process.env.REACT_APP_SITE_DOMAIN;
 
 const App = () => {
     const [token, setToken] = useState(null);
