@@ -62,7 +62,7 @@ const genreData = {
         name: "Disney",
         playlistId: "37i9dQZF1DX1okZ1ZeITst",
     },
-    disney: {
+    indie: {
         name: "Indie",
         playlistId: "37i9dQZF1DWYBF1dYDPlHw",
     },
