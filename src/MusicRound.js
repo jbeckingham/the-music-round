@@ -159,20 +159,21 @@ const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
     };
 
     const onTimeUp = () => {
-        setTimeUp(true);
         setTimerOn(false);
+        setTimeUp(true);
         pauseSong();
     };
 
     const onReveal = () => {
         setReveal(true);
+        setTimerOn(false);
+        pauseSong();
     };
 
     const onUpdateDifficulty = (value) => {
-        setTimeUp(true);
+        setTimeUp(false);
         setDifficulty(value);
         setReveal(false);
-        setTimeUp(false);
     };
 
     const onUpdateGenre = (value) => {
@@ -220,11 +221,7 @@ const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
                     currentSongData={currentSongData}
                     timerOn={timerOn}
                 />
-                <Reveal
-                    onReveal={onReveal}
-                    currentSongData={currentSongData}
-                    timerOn={timerOn}
-                />
+                <Reveal onReveal={onReveal} currentSongData={currentSongData} />
             </div>
         </>
     );
