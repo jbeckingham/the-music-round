@@ -34,6 +34,10 @@ const genreData = {
         name: "Country",
         playlistId: "37i9dQZF1DWZBCPUIUs2iR",
     },
+    rAndB: {
+        name: "R & B",
+        playlistId: "5z1r7bTErmmuBPmYlew77u",
+    },
     pitbull: {
         name: "Mr Worldwide",
         playlistId: "37i9dQZF1DXcfXDjovoEpj",
@@ -58,6 +62,10 @@ const genreData = {
         name: "Spice Girls",
         playlistId: "37i9dQZF1DWWUJdr9ahsbf",
     },
+    dad: {
+        name: "Dad Music",
+        playlistId: "1JLGQfMBmN1iQjCgTwgpTY",
+    },
     disney: {
         name: "Disney",
         playlistId: "37i9dQZF1DX1okZ1ZeITst",
@@ -80,16 +88,47 @@ const genreData = {
     },
 };
 
+const difficultyData = {
+    veryEasy: {
+        name: "Very Easy",
+        difficultyPlayTime: 20000,
+        difficultyGuessTime: 20000,
+    },
+    easy: {
+        name: "Easy",
+        difficultyPlayTime: 10000,
+        difficultyGuessTime: 10000,
+    },
+    moderate: {
+        name: "Moderate",
+        difficultyPlayTime: 7000,
+        difficultyGuessTime: 7000,
+    },
+    hard: {
+        name: "Hard",
+        difficultyPlayTime: 5000,
+        difficultyGuessTime: 5000,
+    },
+    veryHard: {
+        name: "Very Hard",
+        difficultyPlayTime: 3000,
+        difficultyGuessTime: 3000,
+    },
+};
+
+const getRandomElement = (array) => {
+    return array[Math.floor(Math.random() * array.length)];
+};
+
 const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
     const [difficulty, setDifficulty] = useState("easy");
     const [genre, setGenre] = useState("70s");
-    const [currentSongId, setCurrentSongId] = useState("");
     const [currentSongData, setCurrentSongData] = useState(null);
     const [playlistSongs, setPlaylistSongs] = useState({});
+    const [playedSongIds, setPlayedSongIds] = useState({});
     const [reveal, setReveal] = useState(false);
     const [timerOn, setTimerOn] = useState(false);
     const [timeUp, setTimeUp] = useState(false);
-    const [clearDownFlag, setClearDownFlag] = useState(false);
 
     const fetchSongs = () => {
         Object.entries(genreData).map(([genre, { playlistId }]) => {
@@ -104,58 +143,40 @@ const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
 
     useEffect(fetchSongs, []);
 
-    const difficultyData = {
-        veryEasy: {
-            name: "Very Easy",
-            difficultyPlayTime: 20000,
-            difficultyGuessTime: 20000,
-        },
-        easy: {
-            name: "Easy",
-            difficultyPlayTime: 10000,
-            difficultyGuessTime: 10000,
-        },
-        moderate: {
-            name: "Moderate",
-            difficultyPlayTime: 7000,
-            difficultyGuessTime: 7000,
-        },
-        hard: {
-            name: "Hard",
-            difficultyPlayTime: 5000,
-            difficultyGuessTime: 5000,
-        },
-        veryHard: {
-            name: "Very Hard",
-            difficultyPlayTime: 3000,
-            difficultyGuessTime: 3000,
-        },
-    };
-
     const getDifficultyPlayTime = () =>
         difficultyData[difficulty].difficultyPlayTime;
-    const difficultyGuessTime = () =>
-        difficultyData[difficulty].difficultyGuessTime;
 
-    const getNewSongId = () => {
-        const num = Math.floor(Math.random() * playlistSongs[genre].length);
-        setCurrentSongData(playlistSongs[genre][num].track);
-        return playlistSongs[genre][num].track.id;
+    const generateNewSong = () => {
+        let playedGenreSongs = playedSongIds[genre] || [];
+        const unplayedGenreSongs = playlistSongs[genre].filter(
+            (song) => !playedGenreSongs.includes(song.track.id)
+        );
+        let songsToChooseFrom = unplayedGenreSongs;
+        if (unplayedGenreSongs.length == 0) {
+            playedGenreSongs = [];
+            songsToChooseFrom = playlistSongs[genre];
+        }
+        const song = getRandomElement(songsToChooseFrom);
+        setCurrentSongData(song.track);
+        setPlayedSongIds({
+            ...playedSongIds,
+            [genre]: [...playedGenreSongs, song.track.id],
+        });
+        return song.track.id;
     };
 
     const onGo = () => {
         setReveal(false);
         setTimeUp(false);
-        // Generate new id
-        const newSongId = getNewSongId();
-        setCurrentSongId(newSongId);
+        // Generate new song
+        const newSongId = generateNewSong();
         playSong(newSongId).then(() => {
             setTimerOn(true);
         });
     };
 
     const onReplay = () => {
-        playSong(currentSongId);
+        playSong(currentSongData.id);
         setTimeout(pauseSong, getDifficultyPlayTime(difficulty));
     };
 
@@ -172,10 +193,6 @@ const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
     };
 
     const onUpdateDifficulty = (value) => {
-        setClearDownFlag(true);
-        setTimeout(() => {
-            setClearDownFlag(false);
-        }, "0.0001");
         setTimeUp(false);
         setDifficulty(value);
         setReveal(false);
@@ -212,11 +229,11 @@ const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
                         />
                     ) : (
                         <Timer
+                            key={getDifficultyPlayTime(difficulty)}
                             timerOn={timerOn}
                             seconds={getDifficultyPlayTime(difficulty)}
                             onTimeUp={onTimeUp}
                             timeUp={timeUp}
-                            clearDownFlag={clearDownFlag}
                         />
                     )}
                 </div>
