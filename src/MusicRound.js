@@ -89,6 +89,7 @@ const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
     const [reveal, setReveal] = useState(false);
     const [timerOn, setTimerOn] = useState(false);
     const [timeUp, setTimeUp] = useState(false);
+    const [clearDownFlag, setClearDownFlag] = useState(false);
 
     const fetchSongs = () => {
         Object.entries(genreData).map(([genre, { playlistId }]) => {
@@ -171,6 +172,10 @@ const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
     };
 
     const onUpdateDifficulty = (value) => {
+        setClearDownFlag(true);
+        setTimeout(() => {
+            setClearDownFlag(false);
+        }, "0.0001");
         setTimeUp(false);
         setDifficulty(value);
         setReveal(false);
@@ -211,6 +216,7 @@ const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
                             seconds={getDifficultyPlayTime(difficulty)}
                             onTimeUp={onTimeUp}
                             timeUp={timeUp}
+                            clearDownFlag={clearDownFlag}
                         />
                     )}
                 </div>
