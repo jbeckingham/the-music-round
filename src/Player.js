@@ -108,6 +108,18 @@ const Player = ({ token }) => {
             .then((data) => data.items);
     };
 
+    const getPlaylistInfo = (playlistUri) => {
+        return fetch(`https://api.spotify.com/v1/playlists/${playlistUri}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        }).then((response) => {
+            return response.ok ? response.json() : null;
+        });
+    };
+
     const pauseSong = () => {
         return pause({
             playerInstance: spotifyPlayer,
@@ -130,6 +142,7 @@ const Player = ({ token }) => {
                     playSong={playSong}
                     pauseSong={pauseSong}
                     getPlaylistSongs={getPlaylistSongs}
+                    getPlaylistInfo={getPlaylistInfo}
                 />
             )}
         </>

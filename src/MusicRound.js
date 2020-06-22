@@ -8,6 +8,7 @@ import SongInfo from "./SongInfo";
 import Reveal from "./Reveal";
 import { Divider } from "semantic-ui-react";
 import Timer from "./Timer";
+import CustomPlaylist from "./CustomPlaylist";
 
 const genreData = {
     "70s": {
@@ -86,6 +87,10 @@ const genreData = {
         name: "Mozart",
         playlistId: "0fuX5lDLGVqojcZonDHqoJ",
     },
+    custom: {
+        name: "Custom Playlist",
+        playlistId: "",
+    },
 };
 
 const difficultyData = {
@@ -120,7 +125,12 @@ const getRandomElement = (array) => {
     return array[Math.floor(Math.random() * array.length)];
 };
 
-const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
+const MusicRound = ({
+    playSong,
+    pauseSong,
+    getPlaylistSongs,
+    getPlaylistInfo,
+}) => {
     const [difficulty, setDifficulty] = useState("easy");
     const [genre, setGenre] = useState("70s");
     const [currentSongData, setCurrentSongData] = useState(null);
@@ -129,13 +139,14 @@ const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
     const [reveal, setReveal] = useState(false);
     const [timerOn, setTimerOn] = useState(false);
     const [timeUp, setTimeUp] = useState(false);
+    const [customPlaylistInfo, setCustomPlaylistInfo] = useState(false);
 
     const fetchSongs = () => {
         Object.entries(genreData).map(([genre, { playlistId }]) => {
             getPlaylistSongs(playlistId).then((songs) =>
                 setPlaylistSongs((prevState) => ({
                     ...prevState,
-                    [genre]: songs,
+                    [genre]: songs || [],
                 }))
             );
         });
@@ -156,13 +167,16 @@ const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
             playedGenreSongs = [];
             songsToChooseFrom = playlistSongs[genre];
         }
-        const song = getRandomElement(songsToChooseFrom);
-        setCurrentSongData(song.track);
-        setPlayedSongIds({
-            ...playedSongIds,
-            [genre]: [...playedGenreSongs, song.track.id],
-        });
-        return song.track.id;
+        if (songsToChooseFrom.length != 0) {
+            const song = getRandomElement(songsToChooseFrom);
+            setCurrentSongData(song.track);
+            setPlayedSongIds({
+                ...playedSongIds,
+                [genre]: [...playedGenreSongs, song.track.id],
+            });
+            return song.track.id;
+        }
+        return null;
     };
 
     const onGo = () => {
@@ -170,9 +184,11 @@ const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
         setTimeUp(false);
         // Generate new song
         const newSongId = generateNewSong();
-        playSong(newSongId).then(() => {
-            setTimerOn(true);
-        });
+        if (newSongId) {
+            playSong(newSongId).then(() => {
+                setTimerOn(true);
+            });
+        }
     };
 
     const onReplay = () => {
@@ -204,6 +220,25 @@ const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
         setTimeUp(false);
     };
 
+    const onUpdateCustomPlaylistId = (value) => {
+        // Check if custom genre, and if so make sure songs are pulled in
+        getPlaylistInfo(value).then((data) => {
+            if (data) {
+                setCustomPlaylistInfo(data);
+                setPlaylistSongs((prevState) => ({
+                    ...prevState,
+                    [genre]: data.tracks.items,
+                }));
+            } else {
+                setCustomPlaylistInfo(null);
+                setPlaylistSongs((prevState) => ({
+                    ...prevState,
+                    [genre]: [],
+                }));
+            }
+        });
+    };
+
     return (
         <>
             <div className="App">
@@ -220,6 +255,13 @@ const MusicRound = ({ playSong, pauseSong, getPlaylistSongs }) => {
                     genres={genreData}
                     timerOn={timerOn}
                 />
+                {genre == "custom" && (
+                    <CustomPlaylist
+                        onUpdateCustomPlaylistId={onUpdateCustomPlaylistId}
+                        customPlaylistInfo={customPlaylistInfo}
+                    />
+                )}
+
                 <Divider hidden />
                 <div className="timerBox">
                     {reveal ? (

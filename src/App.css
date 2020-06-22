@@ -48,6 +48,7 @@
     min-height: 220px;
 }
 
-/* .timerBox canvas {
-    position: unset !important;
-} */
+.custom-import-success {
+    font-size: 12px;
+    color: green;
+}
