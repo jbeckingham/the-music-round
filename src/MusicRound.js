@@ -192,8 +192,11 @@ const MusicRound = ({
     };
 
     const onReplay = () => {
-        playSong(currentSongData.id);
-        setTimeout(pauseSong, getDifficultyPlayTime(difficulty));
+        setReveal(false);
+        setTimeUp(false);
+        playSong(currentSongData.id).then(() => {
+            setTimerOn(true);
+        });
     };
 
     const onTimeUp = () => {

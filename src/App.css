@@ -50,5 +50,10 @@
 
 .custom-import-success {
     font-size: 12px;
-    color: green;
+    color: #2ecc40;
+}
+
+.custom-import-error {
+    font-size: 12px;
+    color: #ff695e;
 }
