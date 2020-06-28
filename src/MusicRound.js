@@ -133,6 +133,7 @@ const MusicRound = ({
 }) => {
     const [difficulty, setDifficulty] = useState("easy");
     const [genre, setGenre] = useState("70s");
+    const [playlists, setPlaylists] = useState(genreData);
     const [currentSongData, setCurrentSongData] = useState(null);
     const [playlistSongs, setPlaylistSongs] = useState({});
     const [playedSongIds, setPlayedSongIds] = useState({});
@@ -143,12 +144,19 @@ const MusicRound = ({
 
     const fetchSongs = () => {
         Object.entries(genreData).map(([genre, { playlistId }]) => {
-            getPlaylistSongs(playlistId).then((songs) =>
+            getPlaylistSongs(playlistId).then((songs) => {
+                const filteredSongs = songs
+                    ? songs.filter((item) => item.track)
+                    : [];
                 setPlaylistSongs((prevState) => ({
                     ...prevState,
-                    [genre]: songs || [],
-                }))
-            );
+                    [genre]: filteredSongs || [],
+                }));
+                if (!songs && genre != "custom") {
+                    const { [genre]: tmp, ...rest } = playlists;
+                    setPlaylists(rest);
+                }
+            });
         });
     };
 
@@ -255,7 +263,7 @@ const MusicRound = ({
                 <Divider hidden />
                 <Genre
                     onUpdateGenre={onUpdateGenre}
-                    genres={genreData}
+                    genres={playlists}
                     timerOn={timerOn}
                 />
                 {genre == "custom" && (

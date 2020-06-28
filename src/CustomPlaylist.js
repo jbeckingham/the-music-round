@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Input, Form, Icon, Popup } from "semantic-ui-react";
 
 const popupText =
-    "To get your spotify playlist id, naviate to the playlist in your Spotify app. \n Click the More icon (...) -> Share -> Copy Spotify URI. \n You should have copied text of the form spotify:playlist:7cnpWoxyYpTfdi6MdLZRCZ. \n The Id is the alphanumberical string after 'spotify:playlist:'.";
+    "You can paste your Spotify playlist ID or the whole URI. To get the URI, naviate to the playlist in your Spotify app. \n Click the More icon (...) -> Share -> Copy Spotify URI.";
 
 const CustomPlaylist = ({ onUpdateCustomPlaylistId, customPlaylistInfo }) => {
     const [typingStarted, setTypingStarted] = useState(false);
@@ -10,15 +10,10 @@ const CustomPlaylist = ({ onUpdateCustomPlaylistId, customPlaylistInfo }) => {
 
     const onChange = (event) => {
         event.preventDefault();
+        const id = event.target.value.replace("spotify:playlist:", "");
         setTypingStarted(Boolean(event.target.value));
-        if (event.target.value.includes("spotify:playlist")) {
-            setErrorMessage(
-                'Looks like you\'ve pasted the whole playlist URI. Trying removing "spotify:playlist:" from the beginning.'
-            );
-        } else {
-            setErrorMessage("Invalid playlist id.");
-        }
-        onUpdateCustomPlaylistId(event.target.value);
+        setErrorMessage("Invalid playlist id.");
+        onUpdateCustomPlaylistId(id);
     };
 
     return (
@@ -38,7 +33,10 @@ const CustomPlaylist = ({ onUpdateCustomPlaylistId, customPlaylistInfo }) => {
                         <Icon
                             name="info circle"
                             size="large"
-                            style={{ display: "inline-block" }}
+                            style={{
+                                display: "inline-block",
+                                marginTop: "17px",
+                            }}
                         />
                     }
                 />
@@ -63,7 +61,10 @@ const CustomPlaylist = ({ onUpdateCustomPlaylistId, customPlaylistInfo }) => {
                                 size="large"
                                 inverted
                                 color="green"
-                                style={{ display: "inline-block" }}
+                                style={{
+                                    display: "inline-block",
+                                    marginTop: "17px",
+                                }}
                             />
                         ) : (
                             <Icon
@@ -71,7 +72,10 @@ const CustomPlaylist = ({ onUpdateCustomPlaylistId, customPlaylistInfo }) => {
                                 size="large"
                                 inverted
                                 color="red"
-                                style={{ display: "inline-block" }}
+                                style={{
+                                    display: "inline-block",
+                                    marginTop: "17px",
+                                }}
                             />
                         )}
                     </>
