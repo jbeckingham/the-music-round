@@ -63,6 +63,10 @@ const genreData = {
         name: "Spice Girls",
         playlistId: "37i9dQZF1DWWUJdr9ahsbf",
     },
+    boyBands: {
+        name: "90s Boy Bands",
+        playlistId: "37i9dQZF1DX17dmzi8A5FV",
+    },
     dad: {
         name: "Dad Music",
         playlistId: "1JLGQfMBmN1iQjCgTwgpTY",
