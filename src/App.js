@@ -12,10 +12,9 @@ const redirectDomain = process.env.REACT_APP_SITE_DOMAIN;
 const App = () => {
     const [ready, setReady] = useState(false);
     const [spotifyPlayer, setSpotifyPlayer] = useState(null);
-    const [token, setToken] = useState(null);
+    const token = hash.access_token;
 
     window.onSpotifyWebPlaybackSDKReady = () => {
-        console.log("connecting with token..." + token);
         const player = new window.Spotify.Player({
             name: "Web Playback SDK Quick Start Player",
             getOAuthToken: (cb) => {
@@ -64,15 +63,6 @@ const App = () => {
             }
         });
     };
-
-    useEffect(() => {
-        let _token = hash.access_token;
-
-        if (_token) {
-            console.log("setting token...");
-            setToken(_token);
-        }
-    }, []);
 
     return (
         <div className="App">
