@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Form, Button, Select } from "semantic-ui-react";
+import React from "react";
+import { Select } from "semantic-ui-react";
 
 const Genre = ({ onUpdateGenre, genres, timerOn }) => {
     const onSubmit = (value) => {

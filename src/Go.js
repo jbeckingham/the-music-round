@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Form, Button } from "semantic-ui-react";
+import React from "react";
+import { Button } from "semantic-ui-react";
 
 const Go = ({ onGo, timerOn }) => {
     const onSubmit = (event) => {

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Form, Button } from "semantic-ui-react";
+import React from "react";
+import { Button } from "semantic-ui-react";
 
 const Difficulty = ({
     onUpdateDifficulty,
@@ -21,7 +21,7 @@ const Difficulty = ({
                         id={id}
                         onClick={onSubmit}
                         key={i}
-                        active={difficulty == id}
+                        active={difficulty === id}
                         disabled={timerOn}
                     >
                         {difficultyData[id].name}

@@ -87,10 +87,6 @@ const genreData = {
         name: "Motown",
         playlistId: "1bZNAY2boFGQn3r06V6QG1",
     },
-    mozart: {
-        name: "Mozart",
-        playlistId: "0fuX5lDLGVqojcZonDHqoJ",
-    },
     custom: {
         name: "Custom Playlist",
         playlistId: "",
@@ -156,7 +152,7 @@ const MusicRound = ({
                     ...prevState,
                     [genre]: filteredSongs || [],
                 }));
-                if (!songs && genre != "custom") {
+                if (!songs && genre !== "custom") {
                     const { [genre]: tmp, ...rest } = playlists;
                     setPlaylists(rest);
                 }
@@ -175,11 +171,11 @@ const MusicRound = ({
             (song) => !playedGenreSongs.includes(song.track.id)
         );
         let songsToChooseFrom = unplayedGenreSongs;
-        if (unplayedGenreSongs.length == 0) {
+        if (unplayedGenreSongs.length === 0) {
             playedGenreSongs = [];
             songsToChooseFrom = playlistSongs[genre];
         }
-        if (songsToChooseFrom.length != 0) {
+        if (songsToChooseFrom.length !== 0) {
             const song = getRandomElement(songsToChooseFrom);
             setCurrentSongData(song.track);
             setPlayedSongIds({
@@ -270,7 +266,7 @@ const MusicRound = ({
                     genres={playlists}
                     timerOn={timerOn}
                 />
-                {genre == "custom" && (
+                {genre === "custom" && (
                     <CustomPlaylist
                         onUpdateCustomPlaylistId={onUpdateCustomPlaylistId}
                         customPlaylistInfo={customPlaylistInfo}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "./App.css";
 
 const SongInfo = ({ currentSongData, genre }) => {
@@ -17,11 +17,8 @@ const SongInfo = ({ currentSongData, genre }) => {
     return (
         <>
             <h3>The song was: {currentSongData.name}</h3>
-            <h3>
-                By: {getArtists()}
-                {genre == "mozart" && " (Originally composed by Mozart)"}
-            </h3>
-            <img src={getAlbumImage()} width="130px"></img>
+            <h3>By: {getArtists()}</h3>
+            <img alt="" src={getAlbumImage()} width="130px"></img>
         </>
     );
 };
