@@ -15,6 +15,7 @@ const App = () => {
     const [token, setToken] = useState(null);
 
     window.onSpotifyWebPlaybackSDKReady = () => {
+        console.log("connecting with token..." + token);
         const player = new window.Spotify.Player({
             name: "Web Playback SDK Quick Start Player",
             getOAuthToken: (cb) => {
@@ -68,6 +69,7 @@ const App = () => {
         let _token = hash.access_token;
 
         if (_token) {
+            console.log("setting token...");
             setToken(_token);
         }
     }, []);
