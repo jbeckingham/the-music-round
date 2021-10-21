@@ -2,15 +2,10 @@ import React from "react";
 import MusicRound from "./MusicRound";
 import { Loader } from "semantic-ui-react";
 
-const Player = ({ token, ready, spotifyPlayer }) => {
-    const play = ({
-        spotify_uri,
-        playerInstance: {
-            _options: { id },
-        },
-    }) => {
+const Player = ({ token, ready, spotifyPlayer, deviceId }) => {
+    const play = ({ spotify_uri }) => {
         return fetch(
-            `https://api.spotify.com/v1/me/player/play?device_id=${id}`,
+            `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
             {
                 method: "PUT",
                 body: JSON.stringify({ uris: [spotify_uri] }),
@@ -22,13 +17,9 @@ const Player = ({ token, ready, spotifyPlayer }) => {
         );
     };
 
-    const pause = ({
-        playerInstance: {
-            _options: { id },
-        },
-    }) => {
+    const pause = () => {
         return fetch(
-            `https://api.spotify.com/v1/me/player/pause?device_id=${id}`,
+            `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`,
             {
                 method: "PUT",
                 body: JSON.stringify({}),
@@ -68,14 +59,11 @@ const Player = ({ token, ready, spotifyPlayer }) => {
     };
 
     const pauseSong = () => {
-        return pause({
-            playerInstance: spotifyPlayer,
-        });
+        return pause();
     };
 
     const playSong = (id) => {
         return play({
-            playerInstance: spotifyPlayer,
             spotify_uri: "spotify:track:" + id,
         });
     };
