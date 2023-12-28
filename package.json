@@ -8,13 +8,14 @@
     "@testing-library/user-event": "^7.1.2",
     "dotenv": "^8.2.0",
     "https": "^1.0.0",
+    "ramda": "^0.29.1",
     "react": "^16.13.1",
     "react-countdown-clock": "^2.7.0",
     "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1",
+    "react-scripts": "^5.0.1",
     "react-spotify-web-playback": "^0.6.0",
-    "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^0.88.2",
+    "semantic-ui-css": "^2.5.0",
+    "semantic-ui-react": "^2.1.5",
     "use-sound": "^1.0.2"
   },
   "scripts": {

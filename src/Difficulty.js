@@ -1,35 +1,34 @@
 import React from "react";
-import { Button } from "semantic-ui-react";
+import { Select } from "semantic-ui-react";
 
 const Difficulty = ({
-    onUpdateDifficulty,
-    difficulty,
-    difficultyData,
-    timerOn,
+  onUpdateDifficulty,
+  difficulty,
+  difficultyData,
+  timerOn,
 }) => {
-    const onSubmit = (event) => {
-        event.preventDefault();
-        onUpdateDifficulty(event.target.id);
-    };
+  const onSubmit = (value) => {
+    onUpdateDifficulty(value);
+  };
 
-    return (
-        <div>
-            <h3>Choose your difficulty:</h3>
-            <Button.Group widths={Object.keys(difficultyData).length}>
-                {Object.keys(difficultyData).map((id, i) => (
-                    <Button
-                        id={id}
-                        onClick={onSubmit}
-                        key={i}
-                        active={difficulty === id}
-                        disabled={timerOn}
-                    >
-                        {difficultyData[id].name}
-                    </Button>
-                ))}
-            </Button.Group>
-        </div>
-    );
+  const difficultyOptions = difficultyData.map((i) => ({
+    key: i.value,
+    value: i.value,
+    text: i.name,
+  }));
+
+  return (
+    <div>
+      <h3>Choose your difficulty:</h3>
+      <Select
+        style={{ minWidth: "200px" }}
+        onChange={(event, data) => onSubmit(data.value)}
+        options={difficultyOptions}
+        defaultValue={difficulty.value}
+        disabled={timerOn}
+      />
+    </div>
+  );
 };
 
 export default Difficulty;
