@@ -2,4 +2,6 @@
 
 React App to play a music intro style game
 
-You can pick difficulty level (time you are given to listen to song) and a genre, which is a set of hardcoded Spotify playlists. You will need to log in to a Spotify premium account to play.
+Currently hosted: https://the-music-round.netlify.app/
+
+You can pick difficulty level (time you are given to listen to song) and a genre, which you can choose from a list of suggested ones, or you can pull in your own custom playlist. You will need to log in to a Spotify premium account to play.
