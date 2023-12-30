@@ -1,134 +1,20 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
-import Go from "./Go";
-import Replay from "./Replay";
+import Play from "./Play";
 import Difficulty from "./Difficulty";
-import Genre from "./Genre";
+import PlaylistSelector from "./PlaylistSelector";
 import SongInfo from "./SongInfo";
 import Reveal from "./Reveal";
-import { Divider } from "semantic-ui-react";
+import { Divider, Grid } from "semantic-ui-react";
 import Timer from "./Timer";
 import CustomPlaylist from "./CustomPlaylist";
-import { find, propEq } from "ramda";
+import { find, propEq, evolve, pipe, filter, path, assocPath } from "ramda";
+import Next from "./Next";
+import Previous from "./Previous";
+import { playlistData, difficultyData, gameStates } from "./config";
 
-const genreData = {
-  "70s": {
-    name: "70s",
-    playlistId: "37i9dQZF1DWTJ7xPn4vNaz",
-  },
-  "80s": {
-    name: "80s",
-    playlistId: "37i9dQZF1DX4UtSsGT1Sbe",
-  },
-  "90s": {
-    name: "90s",
-    playlistId: "37i9dQZF1DXbTxeAdrVG2l",
-  },
-  "00s": {
-    name: "00s",
-    playlistId: "37i9dQZF1DX4o1oenSJRJd",
-  },
-  taylorSwift: {
-    name: "Taylor Swift",
-    playlistId: "37i9dQZF1DX5KpP2LN299J",
-  },
-  country: {
-    name: "Country",
-    playlistId: "37i9dQZF1DWZBCPUIUs2iR",
-  },
-  rAndB: {
-    name: "R & B",
-    playlistId: "5z1r7bTErmmuBPmYlew77u",
-  },
-  pitbull: {
-    name: "Mr Worldwide",
-    playlistId: "37i9dQZF1DXcfXDjovoEpj",
-  },
-  elton: {
-    name: "Elton John",
-    playlistId: "37i9dQZF1DX7VulteLVOkq",
-  },
-  queen: {
-    name: "Queen",
-    playlistId: "37i9dQZF1DWSNC7AjZWNry",
-  },
-  burtBacharach: {
-    name: "Burt Bacharach",
-    playlistId: "37i9dQZF1DZ06evO1MMyZq",
-  },
-  rollingStones: {
-    name: "Rolling Stones",
-    playlistId: "37i9dQZF1DX5COO9vTaRpO",
-  },
-  spiceGirls: {
-    name: "Spice Girls",
-    playlistId: "37i9dQZF1DWWUJdr9ahsbf",
-  },
-  boyBands: {
-    name: "90s Boy Bands",
-    playlistId: "37i9dQZF1DX17dmzi8A5FV",
-  },
-  dad: {
-    name: "Dad Music",
-    playlistId: "1JLGQfMBmN1iQjCgTwgpTY",
-  },
-  disney: {
-    name: "Disney",
-    playlistId: "37i9dQZF1DX1okZ1ZeITst",
-  },
-  indie: {
-    name: "Indie",
-    playlistId: "37i9dQZF1DWYBF1dYDPlHw",
-  },
-  floRida: {
-    name: "Flo Rida",
-    playlistId: "37i9dQZF1DZ06evO07bvXy",
-  },
-  motown: {
-    name: "Motown",
-    playlistId: "1bZNAY2boFGQn3r06V6QG1",
-  },
-  custom: {
-    name: "Custom Playlist",
-    playlistId: "",
-  },
-};
-
-const difficultyData = [
-  {
-    value: "veryEasy",
-    name: "Very Easy (20 seconds)",
-    difficultyPlayTime: 20000,
-    difficultyGuessTime: 20000,
-  },
-  {
-    value: "easy",
-    name: "Easy (10 seconds)",
-    difficultyPlayTime: 10000,
-    difficultyGuessTime: 10000,
-  },
-  {
-    value: "moderate",
-    name: "Moderate (7 seconds)",
-    difficultyPlayTime: 7000,
-    difficultyGuessTime: 7000,
-  },
-  {
-    value: "hard",
-    name: "Hard (5 seconds)",
-    difficultyPlayTime: 5000,
-    difficultyGuessTime: 5000,
-  },
-  {
-    value: "veryHard",
-    name: "Very Hard (3 seconds)",
-    difficultyPlayTime: 3000,
-    difficultyGuessTime: 3000,
-  },
-];
-
-const getRandomElement = (array) => {
-  return array[Math.floor(Math.random() * array.length)];
+const shuffle = (array) => {
+  return array.sort(() => Math.random() - 0.5);
 };
 
 const MusicRound = ({
@@ -138,166 +24,183 @@ const MusicRound = ({
   getPlaylistInfo,
 }) => {
   const [difficulty, setDifficulty] = useState("easy");
-  const [genre, setGenre] = useState("70s");
-  const [playlists, setPlaylists] = useState(genreData);
-  const [currentSongData, setCurrentSongData] = useState(null);
-  const [playlistSongs, setPlaylistSongs] = useState({});
-  const [playedSongIds, setPlayedSongIds] = useState({});
-  const [reveal, setReveal] = useState(false);
-  const [timerOn, setTimerOn] = useState(false);
-  const [timeUp, setTimeUp] = useState(false);
-  const [customPlaylistInfo, setCustomPlaylistInfo] = useState(false);
+  const [playlist, setPlaylist] = useState("70s");
+  const [playlists, setPlaylists] = useState(playlistData);
+  const [gameState, setGameState] = useState(gameStates.READY);
+  const [fetchingCustomPlaylist, setFetchingCustomPlaylist] = useState(false);
 
-  const fetchSongs = () => {
-    Object.entries(genreData).map(([genre, { playlistId }]) => {
-      getPlaylistSongs(playlistId).then((songs) => {
-        const filteredSongs = songs ? songs.filter((item) => item.track) : [];
-        setPlaylistSongs((prevState) => ({
-          ...prevState,
-          [genre]: filteredSongs || [],
-        }));
-        if (!songs && genre !== "custom") {
-          const { [genre]: tmp, ...rest } = playlists;
-          setPlaylists(rest);
-        }
-      });
+  const setPlaylistSongs = (songs, playlist) => {
+    const sortedSongs = songs
+      ? pipe((filter((item) => item.track), shuffle))(songs)
+      : [];
+    const newPlaylists = evolve({
+      [playlist]: (data) => ({
+        ...data,
+        songs: sortedSongs,
+        fetched: true,
+      }),
+    })(playlists);
+    setPlaylists(newPlaylists);
+  };
+
+  const fetchPlaylistSongs = (playlist) => {
+    const playlistData = playlists[playlist];
+    if (playlistData.fetched) return;
+    getPlaylistSongs(playlistData.playlistId).then((songs) => {
+      setPlaylistSongs(songs, playlist);
     });
   };
 
-  useEffect(fetchSongs, []);
+  const onUpdateCustomPlaylistId = (value) => {
+    setFetchingCustomPlaylist(true);
+    getPlaylistInfo(value).then((data) => {
+      if (data) {
+        const sortedSongs = data.tracks.items ? shuffle(data.tracks.items) : [];
+        const newPlaylists = evolve({
+          custom: (playlistData) => ({
+            ...playlistData,
+            songs: sortedSongs,
+            fetched: true,
+            spotifyName: data.name,
+          }),
+        })(playlists);
+        setPlaylists(newPlaylists);
+        setFetchingCustomPlaylist(false);
+      } else {
+        setPlaylists({
+          ...playlists,
+          custom: { ...playlists.custom, songs: [], spotifyName: null },
+        });
+        setFetchingCustomPlaylist(false);
+      }
+    });
+  };
+
+  useEffect(() => fetchPlaylistSongs("70s"), []);
 
   const activeDifficulty = find(propEq(difficulty, "value"))(difficultyData);
+  const currentPlaylist = playlists[playlist];
+  const songPosition = currentPlaylist.position;
+  const currentSongData = path(["songs", songPosition, "track"])(
+    currentPlaylist
+  );
 
-  const generateNewSong = () => {
-    let playedGenreSongs = playedSongIds[genre] || [];
-    const unplayedGenreSongs = playlistSongs[genre].filter(
-      (song) => !playedGenreSongs.includes(song.track.id)
-    );
-    let songsToChooseFrom = unplayedGenreSongs;
-    if (unplayedGenreSongs.length === 0) {
-      playedGenreSongs = [];
-      songsToChooseFrom = playlistSongs[genre];
-    }
-    if (songsToChooseFrom.length !== 0) {
-      const song = getRandomElement(songsToChooseFrom);
-      setCurrentSongData(song.track);
-      setPlayedSongIds({
-        ...playedSongIds,
-        [genre]: [...playedGenreSongs, song.track.id],
-      });
-      return song.track.id;
-    }
-    return null;
-  };
-
-  const onGo = () => {
-    setReveal(false);
-    setTimeUp(false);
-    // Generate new song
-    const newSongId = generateNewSong();
-    if (newSongId) {
-      playSong(newSongId).then(() => {
-        setTimerOn(true);
-      });
-    }
-  };
-
-  const onReplay = () => {
-    setReveal(false);
-    setTimeUp(false);
-    playSong(currentSongData.id).then(() => {
-      setTimerOn(true);
-    });
+  const onPlay = () => {
+    setGameState(gameStates.PLAYING);
+    playSong(currentSongData.id);
   };
 
   const onTimeUp = () => {
-    setTimerOn(false);
-    setTimeUp(true);
+    setGameState(gameStates.TIME_UP);
     pauseSong();
   };
 
   const onReveal = () => {
-    setReveal(true);
-    setTimerOn(false);
+    setGameState(gameStates.REVEALED);
+    pauseSong();
+  };
+
+  const onStop = () => {
+    setGameState(gameStates.READY);
     pauseSong();
   };
 
   const onUpdateDifficulty = (value) => {
-    setTimeUp(false);
+    setGameState(gameStates.READY);
     setDifficulty(value);
-    setReveal(false);
   };
 
-  const onUpdateGenre = (value) => {
-    setGenre(value);
-    setReveal(false);
-    setTimeUp(false);
+  const onUpdatePlaylist = (value) => {
+    if (value !== "custom") fetchPlaylistSongs(value);
+    setPlaylist(value);
+    setGameState(gameStates.READY);
   };
 
-  const onUpdateCustomPlaylistId = (value) => {
-    // Check if custom genre, and if so make sure songs are pulled in
-    getPlaylistInfo(value).then((data) => {
-      if (data) {
-        setCustomPlaylistInfo(data);
-        setPlaylistSongs((prevState) => ({
-          ...prevState,
-          [genre]: data.tracks.items,
-        }));
-      } else {
-        setCustomPlaylistInfo(null);
-        setPlaylistSongs((prevState) => ({
-          ...prevState,
-          [genre]: [],
-        }));
-      }
-    });
+  const onPrevious = () => {
+    const newPosition = songPosition - 1;
+    setPlaylists(assocPath([playlist, "position"], newPosition, playlists));
+    playSong(currentPlaylist.songs[newPosition].track.id);
+    setGameState(gameStates.PLAYING);
+  };
+
+  const onNext = () => {
+    const newPosition = songPosition + 1;
+    setPlaylists(assocPath([playlist, "position"], newPosition, playlists));
+    playSong(currentPlaylist.songs[newPosition].track.id);
+    setGameState(gameStates.PLAYING);
   };
 
   return (
     <>
       <div className="App">
-        <h1>Time to play the music round!</h1>
+        <PlaylistSelector
+          onUpdatePlaylist={onUpdatePlaylist}
+          playlists={playlists}
+          gameState={gameState}
+        />
+        <Divider hidden />
+
         <Difficulty
           onUpdateDifficulty={onUpdateDifficulty}
           difficulty={activeDifficulty}
           difficultyData={difficultyData}
-          timerOn={timerOn}
+          gameState={gameState}
         />
-        <Divider hidden />
-        <Genre
-          onUpdateGenre={onUpdateGenre}
-          genres={playlists}
-          timerOn={timerOn}
-        />
-        {genre === "custom" && (
+
+        {playlist === "custom" && (
           <CustomPlaylist
             onUpdateCustomPlaylistId={onUpdateCustomPlaylistId}
-            customPlaylistInfo={customPlaylistInfo}
+            customPlaylistInfo={playlists.custom}
+            fetchingCustomPlaylist={fetchingCustomPlaylist}
           />
         )}
 
         <Divider hidden />
         <div className="timerBox">
-          {reveal ? (
-            <SongInfo currentSongData={currentSongData} genre={genre} />
+          {gameState === gameStates.REVEALED ? (
+            <SongInfo currentSongData={currentSongData} playlist={playlist} />
           ) : (
             <Timer
               key={activeDifficulty.difficultyPlayTime}
-              timerOn={timerOn}
               seconds={activeDifficulty.difficultyPlayTime}
               onTimeUp={onTimeUp}
-              timeUp={timeUp}
+              gameState={gameState}
             />
           )}
         </div>
         <Divider hidden />
-        <Go onGo={onGo} timerOn={timerOn} />
-        <Replay
-          onReplay={onReplay}
-          currentSongData={currentSongData}
-          timerOn={timerOn}
-        />
-        <Reveal onReveal={onReveal} currentSongData={currentSongData} />
+        <Grid>
+          <Grid.Row centered columns={3}>
+            <Grid.Column width={3}>
+              <Previous
+                onPrevious={onPrevious}
+                disabled={
+                  gameState === gameStates.PLAYING ||
+                  currentPlaylist.songs === undefined ||
+                  songPosition === 0
+                }
+              />
+            </Grid.Column>
+            <Grid.Column width={3}>
+              <Play onPlay={onPlay} onStop={onStop} gameState={gameState} />
+            </Grid.Column>
+            <Grid.Column width={3}>
+              <Next
+                onNext={onNext}
+                disabled={
+                  gameState === gameStates.PLAYING ||
+                  currentPlaylist.songs === undefined ||
+                  songPosition === currentPlaylist.songs.length - 1
+                }
+              />
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row columns={1}>
+            <Grid.Column>
+              <Reveal onReveal={onReveal} currentSongData={currentSongData} />
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
       </div>
     </>
   );

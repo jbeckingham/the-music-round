@@ -1,26 +1,18 @@
 import React from "react";
-import "./App.css";
+import { Header } from "semantic-ui-react";
 
-const SongInfo = ({ currentSongData, genre }) => {
-    const getArtists = () => {
-        const artists = currentSongData.artists.map((artist) => artist.name);
-        return artists.join(", ");
-    };
+const SongInfo = ({ currentSongData }) => {
+  const artists = currentSongData.artists
+    .map((artist) => artist.name)
+    .join(", ");
 
-    const getAlbumImage = () => {
-        return currentSongData.album.images[0].url;
-    };
-
-    console.log(currentSongData);
-    console.log(getAlbumImage());
-
-    return (
-        <>
-            <h3>The song was: {currentSongData.name}</h3>
-            <h3>By: {getArtists()}</h3>
-            <img alt="" src={getAlbumImage()} width="130px"></img>
-        </>
-    );
+  return (
+    <>
+      <h2>{currentSongData.name}</h2>
+      <h3>{artists}</h3>
+      <img alt="" src={currentSongData.album.images[0].url} width="130px"></img>
+    </>
+  );
 };
 
 export default SongInfo;
